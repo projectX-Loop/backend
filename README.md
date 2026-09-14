@@ -1,4 +1,4 @@
-# ProjectX Backend
+# backend
 
 금융 AI 챌린지 자산관리 MVP 백엔드 오케스트레이션 서버
 
