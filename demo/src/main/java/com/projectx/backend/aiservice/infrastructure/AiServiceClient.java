@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.projectx.backend.global.exception.BusinessException;
 import com.projectx.backend.global.exception.ErrorCode;
@@ -73,12 +74,18 @@ public class AiServiceClient {
 			return restClient.post()
 					.uri(uri)
 					.contentType(MediaType.APPLICATION_JSON)
-					.body(payload)
+					.body(payload.toString())
 					.retrieve()
 					.body(JsonNode.class);
 		}
+		catch (RestClientResponseException e) {
+			log.warn("ai-service {} returned HTTP {}: {}", uri, e.getStatusCode().value(),
+					e.getResponseBodyAsString());
+			throw new BusinessException(unavailableCode);
+		}
 		catch (RestClientException e) {
 			// 정상 실패(REJECTED 등)는 200 + status로 오므로 여기까지 안 온다 — 연결 실패·타임아웃·잘못된 본문(422)만 해당.
+			log.warn("ai-service {} request failed: {}", uri, e.getMessage());
 			throw new BusinessException(unavailableCode);
 		}
 	}
